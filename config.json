@@ -1,0 +1,20 @@
+{
+    "main_table": {
+        "directory": "C:/dados/contratos",
+        "name": "contratos",
+        "primary_key": "id",
+        "file_path": "C:/dados/contratos/contratos.db"
+    },
+    "related_tables": [
+        {
+            "directory": "C:/dados/clientes",
+            "name": "clientes",
+            "join_field": "codigo_cliente",
+            "key_field": "codigo",
+            "fields_to_include": ["nome", "telefone", "email"],
+            "alias": "cliente"
+        }
+    ],
+    "webhook_url": "https://seu-endpoint.com/webhook",
+    "check_interval": 3
+}
