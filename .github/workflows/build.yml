@@ -1,0 +1,39 @@
+name: Build ParadoxMonitor
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Permite executar manualmente
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller requests pypyodbc
+    
+    - name: Gerar executável
+      run: |
+        pyinstaller --onefile --noconsole --name "ParadoxMonitor" paradox_monitor.py
+    
+    - name: Upload do executável
+      uses: actions/upload-artifact@v3
+      with:
+        name: ParadoxMonitor-Windows
+        path: dist/ParadoxMonitor.exe
+        
+    - name: Listar arquivos gerados
+      run: |
+        echo "Arquivos na pasta dist:"
+        dir dist
