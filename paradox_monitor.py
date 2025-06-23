@@ -7,6 +7,9 @@ import pyodbc
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
+import pyodbc
+import os
+
 def debug_system():
     print("=== DEBUG SISTEMA ===")
     
