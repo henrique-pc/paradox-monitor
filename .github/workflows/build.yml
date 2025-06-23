@@ -5,31 +5,66 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # Permite executar manualmente
 
 jobs:
   build-32bit:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
     - name: Setup Python 32-bit
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-        architecture: 'x86'  # Força 32 bits
+        python-version: '3.12'  # Versão estável mais recente
+        architecture: 'x86'     # Força 32 bits
+        cache: 'pip'            # Cache das dependências pip
+    
+    - name: Verify Python architecture
+      run: |
+        python -c "import platform; print(f'Architecture: {platform.architecture()}')"
+        python -c "import sys; print(f'Python version: {sys.version}')"
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyodbc requests schedule pyinstaller
+        pip install pypyodbc pyodbc requests schedule pyinstaller
+    
+    - name: List available ODBC drivers
+      run: |
+        python -c "import pyodbc; print('ODBC Drivers:'); [print(f'  - {d}') for d in pyodbc.drivers()]"
     
     - name: Build executable
       run: |
-        pyinstaller --onefile --noconsole paradox_monitor.py
+        pyinstaller --onefile --noconsole --name paradox-monitor-32bit paradox_monitor.py
     
-    - name: Upload artifact
+    - name: Upload executable artifact
       uses: actions/upload-artifact@v4
       with:
         name: paradox-monitor-32bit
-        path: dist/paradox_monitor.exe
+        path: dist/paradox-monitor-32bit.exe
+        retention-days: 30
+    
+    - name: Create release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload release asset (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/paradox-monitor-32bit.exe
+        asset_name: paradox-monitor-32bit.exe
+        asset_content_type: application/octet-stream
