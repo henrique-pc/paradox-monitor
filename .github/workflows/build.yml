@@ -37,7 +37,7 @@ jobs:
     
     - name: Build executable
       run: |
-        pyinstaller --onefile --noconsole --name paradox-monitor-32bit paradox_monitor.py
+        pyinstaller --onefile --console --name paradox-monitor-32bit paradox_monitor.py
     
     - name: Upload executable artifact
       uses: actions/upload-artifact@v4
