@@ -12,7 +12,7 @@ import os
 
 def debug_system():
     print("=== DEBUG SISTEMA ===")
-   
+
     # Verificar arquitetura
     import platform
     print(f"Arquitetura: {platform.architecture()}")
