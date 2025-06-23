@@ -3,7 +3,7 @@ import os
 import requests
 import json
 import hashlib
-import pypyodbc
+import pyodbc
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
@@ -25,7 +25,7 @@ class ParadoxReader:
         
         for conn_str in connection_strings:
             try:
-                self.connection = pypyodbc.connect(conn_str)
+                self.connection = pyodbc.connect(conn_str)
                 print(f"✅ Conectado via ODBC: {self.db_directory}")
                 return
             except Exception as e:
