@@ -10,36 +10,23 @@ from typing import Dict, List, Any, Optional
 import pyodbc
 import os
 
-def test_connection_strings(directory):
-    # Opção 1: Driver padrão
-    conn_str1 = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};"
-    
-    # Opção 2: Com DefaultDir
-    conn_str2 = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};DefaultDir={directory};"
-    
-    # Opção 3: Com parâmetros adicionais
-    conn_str3 = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};DefaultDir={directory};DriverId=538;FIL=Paradox 5.X;"
-    
-    # Opção 4: Com barras invertidas
-    dir_backslash = directory.replace('/', '\\')
-    conn_str4 = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={dir_backslash};"
-    
-    strings = [conn_str1, conn_str2, conn_str3, conn_str4]
-    
-    for i, conn_str in enumerate(strings, 1):
-        print(f"\nTestando conexão {i}: {conn_str}")
-        try:
-            connection = pyodbc.connect(conn_str)
-            print(f"✅ Conexão {i} FUNCIONOU!")
-            connection.close()
-            return conn_str
-        except Exception as e:
-            print(f"❌ Conexão {i} falhou: {e}")
-    
-    return None
+# Teste a correção
+conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
 
-# Teste as conexões
-working_conn = test_connection_strings("C:/TeitechTraje/Dados")
+try:
+    connection = pyodbc.connect(conn_str, autocommit=False)
+    print("✅ CONEXÃO CORRIGIDA FUNCIONOU!")
+    
+    # Teste uma consulta
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM LocNotaF")
+    row = cursor.fetchone()
+    print(f"✅ Dados encontrados: {row}")
+    
+    connection.close()
+    
+except Exception as e:
+    print(f"❌ Ainda com erro: {e}")
 
 class ParadoxReader:
     """Classe para ler dados do Paradox via ODBC"""
