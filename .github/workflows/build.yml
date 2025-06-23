@@ -20,7 +20,6 @@ jobs:
       with:
         python-version: '3.12'  # Versão estável mais recente
         architecture: 'x86'     # Força 32 bits
-        cache: 'pip'            # Cache das dependências pip
     
     - name: Verify Python architecture
       run: |
