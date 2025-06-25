@@ -8,24 +8,115 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 # Opção 1 - Autocommit Falso
-# Teste a correção
-conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
+# Instale pypyodbc
+# pip install pypyodbc
 
-try:
-    connection = pyodbc.connect(conn_str, autocommit=False)
-    print("✅ CONEXÃO CORRIGIDA FUNCIONOU!")
+import pypyodbc
+
+def test_pypyodbc_connection():
+    conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
     
-    # Teste uma consulta
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM LocNotaF")
-    row = cursor.fetchone()
-    print(f"✅ Dados encontrados: {row}")
-    
-    connection.close()
-    
-except Exception as e:
-    print(f"❌ Ainda com erro: {e}")
+    try:
+        connection = pypyodbc.connect(conn_str)
+        print("✅ pypyodbc FUNCIONOU!")
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM LocNotaF")
+        row = cursor.fetchone()
+        print(f"✅ Dados: {row}")
+        
+        connection.close()
+        return True
+        
+    except Exception as e:
+        print(f"❌ pypyodbc falhou: {e}")
+        return False
+
+# Teste
+test_pypyodbc_connection()
 # Fim Opção 1
+
+# Opção 2
+import pyodbc
+
+def find_all_paradox_drivers():
+    drivers = pyodbc.drivers()
+    print("Todos os drivers ODBC:")
+    
+    paradox_variants = []
+    for driver in drivers:
+        print(f"  - {driver}")
+        if 'paradox' in driver.lower() or 'db' in driver.lower():
+            paradox_variants.append(driver)
+    
+    print(f"\nPossíveis drivers Paradox: {paradox_variants}")
+    return paradox_variants
+
+# Execute
+drivers = find_all_paradox_drivers()
+# Fim Opção 2
+
+# Opção 3
+import winreg
+
+def check_paradox_registry():
+    try:
+        # Verificar configuração do driver Paradox
+        key_path = r"SOFTWARE\ODBC\ODBCINST.INI\Microsoft Paradox Driver (*.db )"
+        
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
+            try:
+                driver_path = winreg.QueryValueEx(key, "Driver")[0]
+                print(f"Driver encontrado em: {driver_path}")
+                
+                # Verificar se existe
+                import os
+                if os.path.exists(driver_path):
+                    print("✅ Arquivo do driver existe")
+                else:
+                    print("❌ Arquivo do driver não encontrado")
+                    
+            except FileNotFoundError:
+                print("❌ Configuração do driver não encontrada")
+                
+    except Exception as e:
+        print(f"Erro ao verificar registro: {e}")
+
+check_paradox_registry()
+# Fim Opção 3
+
+# Opção 4
+import pyodbc
+
+def raw_paradox_connection():
+    conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
+    
+    # Tentar conexão mais básica possível
+    try:
+        # Método 1: Conexão direta
+        connection = pyodbc.connect(conn_str, 
+                                  autocommit=None,  # Não definir
+                                  ansi=True,        # Forçar ANSI
+                                  timeout=0)        # Sem timeout
+        print("✅ Método 1 funcionou!")
+        connection.close()
+        return True
+    except Exception as e:
+        print(f"❌ Método 1: {e}")
+    
+    try:
+        # Método 2: Sem parâmetros
+        connection = pyodbc.connect(conn_str)
+        print("✅ Método 2 funcionou!")
+        connection.close()
+        return True
+    except Exception as e:
+        print(f"❌ Método 2: {e}")
+    
+    return False
+
+raw_paradox_connection()
+# Fim Opção 4
 
 class ParadoxReader:
     """Classe para ler dados do Paradox via ODBC"""
