@@ -7,26 +7,86 @@ import pyodbc
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
-import pyodbc
-import os
+# Opção 1 - Autocommit Falso
+def connect_to_paradox(directory):
+    conn_str = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};"
+    
+    try:
+        # Conectar SEM autocommit automático
+        connection = pyodbc.connect(conn_str, autocommit=False)
+        print("✅ Conexão bem-sucedida!")
+        return connection
+    except Exception as e:
+        print(f"❌ Erro na conexão: {e}")
+        return None
+# Fim Opção 1
 
-# Teste a correção
-conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
+# Opção 2
+def connect_to_paradox_manual(directory):
+    conn_str = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};"
+    
+    try:
+        # Conectar sem configurações automáticas
+        connection = pyodbc.connect(conn_str)
+        
+        # Configurar manualmente se necessário
+        # connection.autocommit = False  # Só se necessário
+        
+        print("✅ Conexão bem-sucedida!")
+        return connection
+    except Exception as e:
+        print(f"❌ Erro na conexão: {e}")
+        return None
+# Fim Opção 2
 
-try:
-    connection = pyodbc.connect(conn_str, autocommit=False)
-    print("✅ CONEXÃO CORRIGIDA FUNCIONOU!")
+# Opção 3
+
+def test_alternative_connections(directory):
+    # Testar diferentes configurações de conexão
+    test_configs = [
+        # Sem autocommit
+        (f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};", {"autocommit": False}),
+        
+        # Com timeout
+        (f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};", {"timeout": 30}),
+        
+        # Sem parâmetros extras
+        (f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};", {}),
+        
+        # Com readonly
+        (f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};ReadOnly=1;", {})
+    ]
     
-    # Teste uma consulta
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM LocNotaF")
-    row = cursor.fetchone()
-    print(f"✅ Dados encontrados: {row}")
+    for i, (conn_str, params) in enumerate(test_configs, 1):
+        print(f"\nTestando configuração {i}:")
+        print(f"String: {conn_str}")
+        print(f"Parâmetros: {params}")
+        
+        try:
+            if params:
+                connection = pyodbc.connect(conn_str, **params)
+            else:
+                connection = pyodbc.connect(conn_str)
+            
+            print(f"✅ Configuração {i} FUNCIONOU!")
+            
+            # Testar consulta simples
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM LocNotaF LIMIT 1")
+            print("✅ Consulta teste bem-sucedida!")
+            
+            connection.close()
+            return conn_str, params
+            
+        except Exception as e:
+            print(f"❌ Configuração {i} falhou: {e}")
     
-    connection.close()
-    
-except Exception as e:
-    print(f"❌ Ainda com erro: {e}")
+    return None, None
+
+# Execute o teste
+working_conn, working_params = test_alternative_connections("C:/TeitechTraje/Dados")
+
+# Fim Opção 3
 
 class ParadoxReader:
     """Classe para ler dados do Paradox via ODBC"""
