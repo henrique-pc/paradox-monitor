@@ -88,26 +88,6 @@ working_conn, working_params = test_alternative_connections("C:/TeitechTraje/Dad
 
 # Fim Opção 3
 
-# Opção 3 Corrigida
-# Teste a correção
-conn_str = "DRIVER={Microsoft Paradox Driver (*.db )};DBQ=C:/TeitechTraje/Dados;"
-
-try:
-    connection = pyodbc.connect(conn_str, autocommit=False)
-    print("✅ CONEXÃO CORRIGIDA FUNCIONOU!")
-    
-    # Teste uma consulta
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM LocNotaF")
-    row = cursor.fetchone()
-    print(f"✅ Dados encontrados: {row}")
-    
-    connection.close()
-    
-except Exception as e:
-    print(f"❌ Ainda com erro: {e}")
-# Fim opção 3 corrigida
-
 class ParadoxReader:
     """Classe para ler dados do Paradox via ODBC"""
     
@@ -126,17 +106,7 @@ class ParadoxReader:
         
         for conn_str in connection_strings:
             try:
-                # Ao invés de:
-                # self.connection = pyodbc.connect(conn_str)
-
-                # Teste:
-                try:
                 self.connection = pyodbc.connect(conn_str, autocommit=False)
-                except:
-                # Fallback sem parâmetros
-                self.connection = pyodbc.connect(conn_str)
-                # Fim do Teste
-            
                 print(f"✅ Conectado via ODBC: {self.db_directory}")
                 return
             except Exception as e:
@@ -468,7 +438,6 @@ if __name__ == "__main__":
     
     # Inicia monitoramento
     monitor = EnhancedParadoxMonitor(config)
-
     
     try:
         monitor.run()
