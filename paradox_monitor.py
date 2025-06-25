@@ -7,6 +7,18 @@ import pyodbc
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
+# Opção 1 - Autocommit Falso
+def connect_to_paradox(directory):
+    conn_str = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};"
+    
+    try:
+        # Conectar SEM autocommit automático
+        connection = pyodbc.connect(conn_str, autocommit=False)
+        print("✅ Conexão bem-sucedida!")
+        return connection
+    except Exception as e:
+        print(f"❌ Erro na conexão: {e}")
+        return None
 # Fim Opção 1
 
 # Opção 2
@@ -457,20 +469,8 @@ if __name__ == "__main__":
     # Inicia monitoramento
     monitor = EnhancedParadoxMonitor(config)
 
-# Opção 1 - Autocommit Falso
-def connect_to_paradox(directory):
-    conn_str = f"DRIVER={{Microsoft Paradox Driver (*.db )}};DBQ={directory};"
-    
-    try:
-        # Conectar SEM autocommit automático
-        connection = pyodbc.connect(conn_str, autocommit=False)
-        print("✅ Conexão bem-sucedida!")
-        return connection
-    except Exception as e:
-        print(f"❌ Erro na conexão: {e}")
-        return None
     
     try:
         monitor.run()
-    #finally:
-        #monitor.close()
+    finally:
+        monitor.close()
