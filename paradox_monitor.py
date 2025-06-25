@@ -472,4 +472,4 @@ except Exception as e:
     try:
         monitor.run()
     finally:
-        #monitor.close()
+        monitor.close()
